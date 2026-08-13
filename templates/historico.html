@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block titulo %}Histórico de {{ pessoa_nome }}{% endblock %}
+{% block conteudo %}
+
+<a href="{{ url_for('home') }}" class="link-voltar">&larr; Voltar</a>
+<h1>Histórico de empréstimos — {{ pessoa_nome }}</h1>
+
+{% if fichas %}
+<table class="tabela">
+    <thead>
+        <tr><th>Livro</th><th>Empréstimo</th><th>Devolução prevista</th><th>Devolução real</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+    {% for f in fichas %}
+        <tr class="{{ 'linha-atraso' if f.status == 'Atrasado' else '' }}">
+            <td>{{ f.livro.titulo }}</td>
+            <td>{{ f.data_emprestimo.strftime('%d/%m/%Y') }}</td>
+            <td>{{ f.data_devolucao_prevista.strftime('%d/%m/%Y') }}</td>
+            <td>{{ f.data_devolucao_real.strftime('%d/%m/%Y') if f.data_devolucao_real else '-' }}</td>
+            <td><span class="badge badge-{{ f.status|lower }}">{{ f.status }}</span></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="vazio">Nenhum empréstimo encontrado para esta pessoa.</p>
+{% endif %}
+
+{% endblock %}

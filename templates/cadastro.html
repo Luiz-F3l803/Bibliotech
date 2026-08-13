@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block titulo %}Cadastros — Biblioteca Escolar{% endblock %}
+{% block conteudo %}
+
+<h1>Cadastros</h1>
+<p class="subtitulo">Gerencie alunos, professores, funcionários e o acervo de livros.</p>
+
+<div class="abas">
+    <a href="{{ url_for('cadastro', aba='aluno') }}" class="aba {{ 'aba-ativa' if aba == 'aluno' }}">🎓 Alunos</a>
+    <a href="{{ url_for('cadastro', aba='professor') }}" class="aba {{ 'aba-ativa' if aba == 'professor' }}">🧑‍🏫 Professores</a>
+    <a href="{{ url_for('cadastro', aba='funcionario') }}" class="aba {{ 'aba-ativa' if aba == 'funcionario' }}">🗂️ Funcionários</a>
+    <a href="{{ url_for('cadastro', aba='livro') }}" class="aba {{ 'aba-ativa' if aba == 'livro' }}">📖 Livros</a>
+</div>
+
+{% if aba == 'aluno' %}
+<div class="painel-cadastro">
+    <form method="POST" action="{{ url_for('cadastrar_aluno') }}" class="form-linha">
+        <input type="text" name="nome" placeholder="Nome do aluno" required>
+        <input type="text" name="matricula" placeholder="Matrícula" required>
+        <input type="text" name="turma" placeholder="Turma (opcional)">
+        <button type="submit" class="btn btn-primario">Cadastrar</button>
+    </form>
+
+    <table class="tabela">
+        <thead><tr><th>Nome</th><th>Matrícula</th><th>Turma</th><th>Histórico</th><th></th></tr></thead>
+        <tbody>
+        {% for a in alunos %}
+            <tr>
+                <td>{{ a.nome }}</td>
+                <td>{{ a.matricula }}</td>
+                <td>{{ a.turma or '-' }}</td>
+                <td><a href="{{ url_for('historico', pessoa_nome=a.nome) }}">Ver empréstimos</a></td>
+                <td>
+                    <form method="POST" action="{{ url_for('deletar_cadastro', tipo='aluno', item_id=a.id) }}"
+                          onsubmit="return confirm('Excluir aluno {{ a.nome }}?');">
+                        <button type="submit" class="btn-mini btn-mini-excluir">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" class="vazio">Nenhum aluno cadastrado.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if aba == 'professor' %}
+<div class="painel-cadastro">
+    <form method="POST" action="{{ url_for('cadastrar_professor') }}" class="form-linha">
+        <input type="text" name="nome" placeholder="Nome do professor" required>
+        <input type="text" name="disciplina" placeholder="Disciplina (opcional)">
+        <button type="submit" class="btn btn-primario">Cadastrar</button>
+    </form>
+
+    <table class="tabela">
+        <thead><tr><th>Nome</th><th>Disciplina</th><th>Histórico</th><th></th></tr></thead>
+        <tbody>
+        {% for p in professores %}
+            <tr>
+                <td>{{ p.nome }}</td>
+                <td>{{ p.disciplina or '-' }}</td>
+                <td><a href="{{ url_for('historico', pessoa_nome=p.nome) }}">Ver empréstimos</a></td>
+                <td>
+                    <form method="POST" action="{{ url_for('deletar_cadastro', tipo='professor', item_id=p.id) }}"
+                          onsubmit="return confirm('Excluir professor {{ p.nome }}?');">
+                        <button type="submit" class="btn-mini btn-mini-excluir">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4" class="vazio">Nenhum professor cadastrado.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if aba == 'funcionario' %}
+<div class="painel-cadastro">
+    <form method="POST" action="{{ url_for('cadastrar_funcionario') }}" class="form-linha form-linha-larga">
+        <input type="text" name="nome" placeholder="Nome do funcionário" required>
+        <input type="text" name="cargo" placeholder="Cargo (opcional)">
+        <input type="text" name="usuario" placeholder="Usuário de login" required>
+        <input type="password" name="senha" placeholder="Senha" required>
+        <button type="submit" class="btn btn-primario">Cadastrar</button>
+    </form>
+
+    <table class="tabela">
+        <thead><tr><th>Nome</th><th>Cargo</th><th>Usuário</th><th></th></tr></thead>
+        <tbody>
+        {% for f in funcionarios %}
+            <tr>
+                <td>{{ f.nome }}</td>
+                <td>{{ f.cargo }}</td>
+                <td>{{ f.usuario }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('deletar_cadastro', tipo='funcionario', item_id=f.id) }}"
+                          onsubmit="return confirm('Excluir funcionário {{ f.nome }}?');">
+                        <button type="submit" class="btn-mini btn-mini-excluir">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4" class="vazio">Nenhum funcionário cadastrado.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if aba == 'livro' %}
+<div class="painel-cadastro">
+    <form method="POST" action="{{ url_for('cadastrar_livro') }}" class="form-linha form-linha-larga">
+        <input type="text" name="titulo" placeholder="Título do livro" required>
+        <input type="text" name="autor" placeholder="Autor (opcional)">
+        <select name="categoria">
+            <option value="">Categoria (opcional)</option>
+            {% for c in categorias %}
+            <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="prateleira" placeholder="Prateleira (ex: A1, B3...)">
+        <input type="number" name="quantidade" placeholder="Quantidade" min="1" value="1" required>
+        <button type="submit" class="btn btn-primario">Cadastrar</button>
+    </form>
+
+    <table class="tabela">
+        <thead><tr><th>Título</th><th>Autor</th><th>Categoria</th><th>Prateleira</th><th>Disponíveis</th><th>Total</th><th></th></tr></thead>
+        <tbody>
+        {% for l in livros %}
+            <tr>
+                <td>{{ l.titulo }}</td>
+                <td>{{ l.autor or '-' }}</td>
+                <td>{{ l.categoria or '-' }}</td>
+                <td>{{ l.prateleira or '-' }}</td>
+                <td>{{ l.quantidade_disponivel }}</td>
+                <td>{{ l.quantidade_total }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('deletar_cadastro', tipo='livro', item_id=l.id) }}"
+                          onsubmit="return confirm('Excluir o livro {{ l.titulo }}?');">
+                        <button type="submit" class="btn-mini btn-mini-excluir">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7" class="vazio">Nenhum livro cadastrado.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% endblock %}

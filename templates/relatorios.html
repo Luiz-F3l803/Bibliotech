@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block titulo %}Relatórios{% endblock %}
+{% block conteudo %}
+
+<h1>Relatórios</h1>
+<p class="subtitulo">Visão geral dos empréstimos, devoluções e livros mais utilizados.</p>
+
+<div class="cards-resumo">
+    <div class="card-resumo">
+        <span class="numero">{{ total_emprestimos }}</span>
+        <span class="rotulo">Total de empréstimos</span>
+    </div>
+    <div class="card-resumo">
+        <span class="numero">{{ total_devolucoes }}</span>
+        <span class="rotulo">Devoluções realizadas</span>
+    </div>
+    <div class="card-resumo">
+        <span class="numero">{{ total_ativos }}</span>
+        <span class="rotulo">Empréstimos ativos</span>
+    </div>
+    <div class="card-resumo card-resumo-alerta {% if total_atrasados > 0 %}ativo{% endif %}">
+        <span class="numero">{{ total_atrasados }}</span>
+        <span class="rotulo">Em atraso</span>
+    </div>
+</div>
+
+<h2 class="titulo-secao">Livros mais utilizados</h2>
+{% if mais_usados %}
+<table class="tabela">
+    <thead><tr><th>Livro</th><th>Vezes emprestado</th></tr></thead>
+    <tbody>
+    {% for titulo, qtd in mais_usados %}
+        <tr><td>{{ titulo }}</td><td>{{ qtd }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="vazio">Ainda não há dados suficientes.</p>
+{% endif %}
+
+<h2 class="titulo-secao">Últimas fichas registradas</h2>
+{% if ultimas_fichas %}
+<table class="tabela">
+    <thead><tr><th>Pessoa</th><th>Livro</th><th>Empréstimo</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for f in ultimas_fichas %}
+        <tr class="{{ 'linha-atraso' if f.status == 'Atrasado' else '' }}">
+            <td>{{ f.pessoa_nome }}</td>
+            <td>{{ f.livro.titulo }}</td>
+            <td>{{ f.data_emprestimo.strftime('%d/%m/%Y') }}</td>
+            <td><span class="badge badge-{{ f.status|lower }}">{{ f.status }}</span></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="vazio">Nenhuma ficha registrada ainda.</p>
+{% endif %}
+
+{% endblock %}

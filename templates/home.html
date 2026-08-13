@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block titulo %}Início — Biblioteca Escolar{% endblock %}
+{% block conteudo %}
+
+{% if total_atrasados > 0 %}
+<div class="alerta-atraso">
+    ⚠️ Atenção: há <strong>{{ total_atrasados }}</strong> empréstimo(s) com devolução atrasada!
+</div>
+{% endif %}
+
+<div class="cards-resumo">
+    <div class="card-resumo">
+        <span class="numero">{{ total_disponiveis }}/{{ total_livros }}</span>
+        <span class="rotulo">Livros disponíveis</span>
+    </div>
+    <div class="card-resumo">
+        <span class="numero">{{ total_emprestimos_ativos }}</span>
+        <span class="rotulo">Empréstimos ativos</span>
+    </div>
+    <div class="card-resumo card-resumo-alerta {% if total_atrasados > 0 %}ativo{% endif %}">
+        <span class="numero">{{ total_atrasados }}</span>
+        <span class="rotulo">Em atraso</span>
+    </div>
+</div>
+
+<div class="acoes-principais">
+    <a href="{{ url_for('nova_ficha') }}" class="btn btn-primario">➕ Nova ficha de empréstimo</a>
+    <a href="{{ url_for('cadastro') }}" class="btn btn-secundario">🧑‍🎓 Cadastrar aluno / professor / funcionário</a>
+</div>
+
+<h2 class="titulo-secao">Fichas de empréstimo ativas</h2>
+
+{% if fichas %}
+<div class="tabela-wrapper">
+    <table class="tabela">
+        <thead>
+            <tr>
+                <th>Pessoa</th>
+                <th>Tipo</th>
+                <th>Livro</th>
+                <th>Empréstimo</th>
+                <th>Devolução prevista</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in fichas %}
+            <tr class="{{ 'linha-atraso' if f.status == 'Atrasado' else '' }}">
+                <td><a href="{{ url_for('historico', pessoa_nome=f.pessoa_nome) }}">{{ f.pessoa_nome }}</a></td>
+                <td>{{ f.pessoa_tipo }}</td>
+                <td>{{ f.livro.titulo }}</td>
+                <td>{{ f.data_emprestimo.strftime('%d/%m/%Y') }}</td>
+                <td>{{ f.data_devolucao_prevista.strftime('%d/%m/%Y') }}</td>
+                <td><span class="badge badge-{{ f.status|lower }}">{{ f.status }}</span></td>
+                <td class="acoes-tabela">
+                    <form method="POST" action="{{ url_for('devolver_ficha', ficha_id=f.id) }}" style="display:inline">
+                        <button type="submit" class="btn-mini btn-mini-ok">Devolver</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('deletar_ficha', ficha_id=f.id) }}" style="display:inline"
+                          onsubmit="return confirm('Tem certeza que deseja excluir esta ficha?');">
+                        <button type="submit" class="btn-mini btn-mini-excluir">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="vazio">Nenhuma ficha de empréstimo ativa no momento.</p>
+{% endif %}
+
+{% endblock %}

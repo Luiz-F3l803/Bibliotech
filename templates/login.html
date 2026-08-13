@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block titulo %}Login — Biblioteca Escolar{% endblock %}
+{% block conteudo %}
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-logo">📚</div>
+        <h1>Biblioteca Escolar</h1>
+        <p class="subtitulo">Acesso restrito aos funcionários da biblioteca</p>
+
+        <form method="POST" action="{{ url_for('login') }}" class="form-padrao">
+            <label for="usuario">Usuário</label>
+            <input type="text" id="usuario" name="usuario" required autofocus placeholder="ex: admin">
+
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" required placeholder="••••••••">
+
+            <button type="submit" class="btn btn-primario btn-full">Entrar</button>
+        </form>
+
+        <p class="dica-login">Primeiro acesso? Usuário: <strong>admin</strong> — Senha: <strong>admin123</strong></p>
+    </div>
+</div>
+{% endblock %}

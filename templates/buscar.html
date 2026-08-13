@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block titulo %}Buscar livros{% endblock %}
+{% block conteudo %}
+
+<h1>Buscar livros</h1>
+<p class="subtitulo">Pesquise por título, autor ou categoria.</p>
+
+<form method="GET" action="{{ url_for('buscar_livros') }}" class="form-linha">
+    <input type="text" name="q" value="{{ termo }}" placeholder="Digite o título, autor ou categoria..." autofocus>
+    <button type="submit" class="btn btn-primario">Buscar</button>
+</form>
+
+{% if termo %}
+    {% if resultados %}
+    <table class="tabela">
+        <thead><tr><th>Título</th><th>Autor</th><th>Categoria</th><th>Prateleira</th><th>Disponibilidade</th></tr></thead>
+        <tbody>
+        {% for l in resultados %}
+            <tr>
+                <td>{{ l.titulo }}</td>
+                <td>{{ l.autor or '-' }}</td>
+                <td>{{ l.categoria or '-' }}</td>
+                <td>{{ l.prateleira or '-' }}</td>
+                <td>
+                    {% if l.quantidade_disponivel > 0 %}
+                        <span class="badge badge-devolvido">{{ l.quantidade_disponivel }} disponível(is)</span>
+                    {% else %}
+                        <span class="badge badge-atrasado">Indisponível</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="vazio">Nenhum livro encontrado para "{{ termo }}".</p>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
