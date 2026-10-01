@@ -4,8 +4,8 @@ Projeto de Desenvolvimento de Sistemas — back-end em Python (Flask) + banco de
 
 ## O que o sistema faz
 
-- Cadastro de alunos, professores e funcionários da biblioteca
-- Cadastro e controle de disponibilidade dos livros do acervo
+- Cadastro de alunos (com turma), turmas, professores e funcionários da biblioteca
+- Cadastro e controle de disponibilidade dos livros do acervo, com categoria e fileira
 - Criação, devolução e exclusão de fichas de empréstimo
 - Monitoramento automático de atrasos (atualizado a cada acesso à Home e aos Relatórios)
 - Aviso visual de empréstimos atrasados na tela inicial
@@ -16,10 +16,23 @@ Projeto de Desenvolvimento de Sistemas — back-end em Python (Flask) + banco de
 
 ## Como rodar no seu computador (ou nos computadores da escola)
 
-### 1. Pré-requisitos
+### Opção mais fácil: arquivo iniciar_biblioteca.bat (Windows)
+
+1. Instale o Python, caso ainda não tenha: [python.org/downloads](https://www.python.org/downloads/)
+   - Durante a instalação, marque a opção **"Add Python to PATH"**.
+2. Dê **dois cliques** no arquivo `iniciar_biblioteca.bat`, dentro da pasta do projeto.
+3. Na primeira vez, ele vai instalar tudo sozinho (pode demorar um pouco). Nas próximas vezes, abre rápido.
+4. O sistema abre automaticamente no navegador em `http://localhost:5000`.
+5. Para encerrar, basta fechar a janela preta (o terminal) que abriu.
+
+> Se aparecer um aviso do Windows Defender/SmartScreen ("O Windows protegeu o computador"), clique em **Mais informações** e depois em **Executar assim mesmo** — isso acontece porque o arquivo não tem uma assinatura digital paga, e é normal em scripts de uso interno/escolar.
+
+### Opção manual (qualquer sistema operacional)
+
+#### 1. Pré-requisitos
 - Python 3.9 ou superior instalado ([python.org](https://www.python.org/downloads/))
 
-### 2. Instalar as dependências
+#### 2. Instalar as dependências
 
 Abra um terminal dentro da pasta do projeto e rode:
 
@@ -29,7 +42,7 @@ pip install -r requirements.txt
 
 Se o computador tiver Python 2 e 3 instalados, pode ser necessário usar `pip3` e `python3` em vez de `pip` e `python`.
 
-### 3. Executar o sistema
+#### 3. Executar o sistema
 
 ```bash
 python app.py
@@ -42,7 +55,7 @@ Usuário padrão criado -> usuário: admin | senha: admin123
  * Running on http://127.0.0.1:5000
 ```
 
-### 4. Acessar pelo navegador
+#### 4. Acessar pelo navegador
 
 Abra o navegador (Chrome, Firefox, Edge...) e acesse:
 
@@ -76,9 +89,10 @@ O sistema usa **SQLite**, um banco de dados leve que não precisa de instalaçã
 
 ```
 biblioteca/
-├── app.py                 # back-end Flask (rotas, modelos, lógica)
-├── requirements.txt        # dependências do projeto
-├── biblioteca.db           # banco de dados (criado automaticamente)
+├── app.py                   # back-end Flask (rotas, modelos, lógica)
+├── requirements.txt         # dependências do projeto
+├── iniciar_biblioteca.bat   # inicia o sistema automaticamente no Windows
+├── biblioteca.db            # banco de dados (criado automaticamente)
 ├── templates/               # telas HTML (login, home, cadastro, etc.)
 │   ├── base.html
 │   ├── login.html

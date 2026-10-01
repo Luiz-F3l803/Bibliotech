@@ -3,13 +3,15 @@
 {% block conteudo %}
 
 <h1>Cadastros</h1>
-<p class="subtitulo">Gerencie alunos, professores, funcionários e o acervo de livros.</p>
+<p class="subtitulo">Gerencie alunos, turmas, professores, funcionários, livros e fileiras do acervo.</p>
 
 <div class="abas">
     <a href="{{ url_for('cadastro', aba='aluno') }}" class="aba {{ 'aba-ativa' if aba == 'aluno' }}">🎓 Alunos</a>
+    <a href="{{ url_for('cadastro', aba='turma') }}" class="aba {{ 'aba-ativa' if aba == 'turma' }}">🏫 Turmas</a>
     <a href="{{ url_for('cadastro', aba='professor') }}" class="aba {{ 'aba-ativa' if aba == 'professor' }}">🧑‍🏫 Professores</a>
     <a href="{{ url_for('cadastro', aba='funcionario') }}" class="aba {{ 'aba-ativa' if aba == 'funcionario' }}">🗂️ Funcionários</a>
     <a href="{{ url_for('cadastro', aba='livro') }}" class="aba {{ 'aba-ativa' if aba == 'livro' }}">📖 Livros</a>
+    <a href="{{ url_for('cadastro', aba='fileira') }}" class="aba {{ 'aba-ativa' if aba == 'fileira' }}">🗄️ Fileiras</a>
 </div>
 
 {% if aba == 'aluno' %}
@@ -17,9 +19,17 @@
     <form method="POST" action="{{ url_for('cadastrar_aluno') }}" class="form-linha">
         <input type="text" name="nome" placeholder="Nome do aluno" required>
         <input type="text" name="matricula" placeholder="Matrícula" required>
-        <input type="text" name="turma" placeholder="Turma (opcional)">
+        <select name="turma">
+            <option value="">Turma (opcional)</option>
+            {% for t in turmas %}
+            <option value="{{ t.nome }}">{{ t.nome }}{% if t.turno %} — {{ t.turno }}{% endif %}</option>
+            {% endfor %}
+        </select>
         <button type="submit" class="btn btn-primario">Cadastrar</button>
     </form>
+    {% if not turmas %}
+    <p class="aviso-inline">Nenhuma turma cadastrada ainda — cadastre em "🏫 Turmas" para que apareça aqui.</p>
+    {% endif %}
 
     <table class="tabela">
         <thead><tr><th>Nome</th><th>Matrícula</th><th>Turma</th><th>Histórico</th><th></th></tr></thead>
@@ -39,6 +49,36 @@
             </tr>
         {% else %}
             <tr><td colspan="5" class="vazio">Nenhum aluno cadastrado.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if aba == 'turma' %}
+<div class="painel-cadastro">
+    <form method="POST" action="{{ url_for('cadastrar_turma') }}" class="form-linha">
+        <input type="text" name="nome" placeholder="Nome da turma (ex: 9º A)" required>
+        <input type="text" name="turno" placeholder="Turno (opcional)">
+        <button type="submit" class="btn btn-primario">Cadastrar</button>
+    </form>
+
+    <table class="tabela">
+        <thead><tr><th>Turma</th><th>Turno</th><th></th></tr></thead>
+        <tbody>
+        {% for t in turmas %}
+            <tr>
+                <td>{{ t.nome }}</td>
+                <td>{{ t.turno or '-' }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('deletar_cadastro', tipo='turma', item_id=t.id) }}"
+                          onsubmit="return confirm('Excluir a turma {{ t.nome }}?');">
+                        <button type="submit" class="btn-mini btn-mini-excluir">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="3" class="vazio">Nenhuma turma cadastrada.</td></tr>
         {% endfor %}
         </tbody>
     </table>
@@ -120,13 +160,21 @@
             <option value="{{ c }}">{{ c }}</option>
             {% endfor %}
         </select>
-        <input type="text" name="prateleira" placeholder="Prateleira (ex: A1, B3...)">
+        <select name="prateleira">
+            <option value="">Fileira (opcional)</option>
+            {% for f in fileiras %}
+            <option value="{{ f.codigo }}">{{ f.codigo }}{% if f.descricao %} — {{ f.descricao }}{% endif %}</option>
+            {% endfor %}
+        </select>
         <input type="number" name="quantidade" placeholder="Quantidade" min="1" value="1" required>
         <button type="submit" class="btn btn-primario">Cadastrar</button>
     </form>
+    {% if not fileiras %}
+    <p class="aviso-inline">Nenhuma fileira cadastrada ainda — cadastre em "🗄️ Fileiras" para que apareça aqui.</p>
+    {% endif %}
 
     <table class="tabela">
-        <thead><tr><th>Título</th><th>Autor</th><th>Categoria</th><th>Prateleira</th><th>Disponíveis</th><th>Total</th><th></th></tr></thead>
+        <thead><tr><th>Título</th><th>Autor</th><th>Categoria</th><th>Fileira</th><th>Disponíveis</th><th>Total</th><th></th></tr></thead>
         <tbody>
         {% for l in livros %}
             <tr>
@@ -145,6 +193,36 @@
             </tr>
         {% else %}
             <tr><td colspan="7" class="vazio">Nenhum livro cadastrado.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if aba == 'fileira' %}
+<div class="painel-cadastro">
+    <form method="POST" action="{{ url_for('cadastrar_fileira') }}" class="form-linha">
+        <input type="text" name="codigo" placeholder="Código da fileira (ex: A1, B3...)" required>
+        <input type="text" name="descricao" placeholder="Descrição (opcional, ex: Literatura brasileira)">
+        <button type="submit" class="btn btn-primario">Cadastrar</button>
+    </form>
+
+    <table class="tabela">
+        <thead><tr><th>Código</th><th>Descrição</th><th></th></tr></thead>
+        <tbody>
+        {% for f in fileiras %}
+            <tr>
+                <td>{{ f.codigo }}</td>
+                <td>{{ f.descricao or '-' }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('deletar_cadastro', tipo='fileira', item_id=f.id) }}"
+                          onsubmit="return confirm('Excluir a fileira {{ f.codigo }}?');">
+                        <button type="submit" class="btn-mini btn-mini-excluir">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="3" class="vazio">Nenhuma fileira cadastrada.</td></tr>
         {% endfor %}
         </tbody>
     </table>

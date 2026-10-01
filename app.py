@@ -51,6 +51,16 @@ class Aluno(db.Model):
         return self.nome
 
 
+class Turma(db.Model):
+    __tablename__ = 'turma'
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(40), unique=True, nullable=False)
+    turno = db.Column(db.String(20))
+
+    def __repr__(self):
+        return self.nome
+
+
 class Professor(db.Model):
     __tablename__ = 'professor'
     id = db.Column(db.Integer, primary_key=True)
@@ -65,6 +75,16 @@ CATEGORIAS_LIVRO = [
     'Romance', 'Fantasia', 'Ficção científica', 'Suspense',
     'Terror', 'Biografia', 'Autoajuda'
 ]
+
+
+class Fileira(db.Model):
+    __tablename__ = 'fileira'
+    id = db.Column(db.Integer, primary_key=True)
+    codigo = db.Column(db.String(40), unique=True, nullable=False)
+    descricao = db.Column(db.String(160))
+
+    def __repr__(self):
+        return self.codigo
 
 
 class Livro(db.Model):
@@ -305,6 +325,8 @@ def cadastro():
     professores = Professor.query.order_by(Professor.nome).all()
     funcionarios = Funcionario.query.order_by(Funcionario.nome).all()
     livros = Livro.query.order_by(Livro.titulo).all()
+    turmas = Turma.query.order_by(Turma.nome).all()
+    fileiras = Fileira.query.order_by(Fileira.codigo).all()
     return render_template(
         'cadastro.html',
         aba=aba,
@@ -312,7 +334,9 @@ def cadastro():
         professores=professores,
         funcionarios=funcionarios,
         livros=livros,
-        categorias=CATEGORIAS_LIVRO
+        categorias=CATEGORIAS_LIVRO,
+        turmas=turmas,
+        fileiras=fileiras
     )
 
 
@@ -331,6 +355,22 @@ def cadastrar_aluno():
         db.session.commit()
         flash('Aluno cadastrado com sucesso!', 'sucesso')
     return redirect(url_for('cadastro', aba='aluno'))
+
+
+@app.route('/cadastro/turma', methods=['POST'])
+@login_obrigatorio
+def cadastrar_turma():
+    nome = request.form.get('nome', '').strip()
+    turno = request.form.get('turno', '').strip()
+    if not nome:
+        flash('Informe o nome da turma.', 'erro')
+    elif Turma.query.filter_by(nome=nome).first():
+        flash('Já existe uma turma com esse nome.', 'erro')
+    else:
+        db.session.add(Turma(nome=nome, turno=turno))
+        db.session.commit()
+        flash('Turma cadastrada com sucesso!', 'sucesso')
+    return redirect(url_for('cadastro', aba='turma'))
 
 
 @app.route('/cadastro/professor', methods=['POST'])
@@ -367,6 +407,22 @@ def cadastrar_funcionario():
     return redirect(url_for('cadastro', aba='funcionario'))
 
 
+@app.route('/cadastro/fileira', methods=['POST'])
+@login_obrigatorio
+def cadastrar_fileira():
+    codigo = request.form.get('codigo', '').strip()
+    descricao = request.form.get('descricao', '').strip()
+    if not codigo:
+        flash('Informe o código da fileira.', 'erro')
+    elif Fileira.query.filter_by(codigo=codigo).first():
+        flash('Já existe uma fileira com esse código.', 'erro')
+    else:
+        db.session.add(Fileira(codigo=codigo, descricao=descricao))
+        db.session.commit()
+        flash('Fileira cadastrada com sucesso!', 'sucesso')
+    return redirect(url_for('cadastro', aba='fileira'))
+
+
 @app.route('/cadastro/livro', methods=['POST'])
 @login_obrigatorio
 def cadastrar_livro():
@@ -396,7 +452,10 @@ def cadastrar_livro():
 @app.route('/cadastro/<tipo>/<int:item_id>/deletar', methods=['POST'])
 @login_obrigatorio
 def deletar_cadastro(tipo, item_id):
-    modelos = {'aluno': Aluno, 'professor': Professor, 'funcionario': Funcionario, 'livro': Livro}
+    modelos = {
+        'aluno': Aluno, 'professor': Professor, 'funcionario': Funcionario,
+        'livro': Livro, 'turma': Turma, 'fileira': Fileira
+    }
     modelo = modelos.get(tipo)
     if not modelo:
         flash('Tipo de cadastro inválido.', 'erro')
@@ -411,6 +470,14 @@ def deletar_cadastro(tipo, item_id):
     if tipo == 'funcionario' and item.id == session.get('funcionario_id'):
         flash('Você não pode excluir o próprio usuário logado.', 'erro')
         return redirect(url_for('cadastro', aba='funcionario'))
+
+    if tipo == 'turma' and Aluno.query.filter_by(turma=item.nome).first():
+        flash('Não é possível excluir: há alunos cadastrados nessa turma.', 'erro')
+        return redirect(url_for('cadastro', aba='turma'))
+
+    if tipo == 'fileira' and Livro.query.filter_by(prateleira=item.codigo).first():
+        flash('Não é possível excluir: há livros cadastrados nessa fileira.', 'erro')
+        return redirect(url_for('cadastro', aba='fileira'))
 
     db.session.delete(item)
     db.session.commit()
